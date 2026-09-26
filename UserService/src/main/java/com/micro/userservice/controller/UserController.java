@@ -17,9 +17,6 @@ import com.micro.userservice.entities.User;
 import com.micro.userservice.services.UserService;
 import com.micro.userservice.util.ResponseStructure;
 
-
-
-
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -32,7 +29,7 @@ public class UserController {
         ResponseStructure<User> response = userService.createUser(user);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
-
+    
     @GetMapping("/{userId}")
     public ResponseEntity<ResponseStructure<User>> getUser(@PathVariable Integer userId) {
         ResponseStructure<User> response = userService.getUser(userId);
@@ -45,9 +42,11 @@ public class UserController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping
-    public ResponseEntity<ResponseStructure<User>> updateUser(@RequestBody User user) {
-        ResponseStructure<User> response = userService.updateUser(user);
+    @PutMapping("/{userId}")
+    public ResponseEntity<ResponseStructure<User>> updateUser(@PathVariable Integer userId,@RequestBody User user) {
+
+        user.setUserId(userId);
+        ResponseStructure<User> response =userService.updateUser(user);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

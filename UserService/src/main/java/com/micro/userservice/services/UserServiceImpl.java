@@ -1,7 +1,6 @@
 package com.micro.userservice.services;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,11 +9,8 @@ import org.springframework.stereotype.Service;
 import com.micro.userservice.entities.User;
 import com.micro.userservice.exception.RecordAlreadyExistException;
 import com.micro.userservice.exception.ResourceNotFoundException;
-import com.micro.userservice.exception.RuleValidationException;
 import com.micro.userservice.repositories.UserRepository;
 import com.micro.userservice.util.ResponseStructure;
-
-
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -24,40 +20,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseStructure<User> createUser(User user) {
-
-        Optional<User> emailUser = userRepository.findByEmail(user.getEmail());
-
-        if (emailUser.isPresent()) {
-            throw new RecordAlreadyExistException("User with Email already exists.");
-        }
-        if (user.getName() == null || user.getName().isEmpty()) {
-            throw new RuleValidationException("Name cannot be empty.");
-        }
-        if (user.getName().length() > 25) {
-            throw new RuleValidationException("Name must be 25 characters or less.");
-        }
-        if (!user.getName().matches("[a-zA-Z ]+")) {
-            throw new RuleValidationException("Name must contain only alphabets.");
-        }
-        if (user.getEmail() == null || user.getEmail().isEmpty()) {
-            throw new RuleValidationException("Email cannot be empty.");
-        }
+    	if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+    	    throw new RecordAlreadyExistException("User already exists with email: " + user.getEmail()
+    	    );
+    	}
         User savedUser = userRepository.save(user);
 
-        ResponseStructure<User> response = new ResponseStructure<>();
-        response.setStatusCode(HttpStatus.CREATED.value());
-        response.setMessage("User created successfully");
-        response.setData(savedUser);
 
-        return response;
+        ResponseStructure<User> responseStructure = new ResponseStructure<>();
+        responseStructure.setStatusCode(HttpStatus.CREATED.value());
+        responseStructure.setMessage("User created successfully");
+        responseStructure.setData(savedUser);
+
+        return responseStructure;
     }
 
     @Override
     public ResponseStructure<User> getUser(Integer userId) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("User not found with ID: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
         ResponseStructure<User> response = new ResponseStructure<>();
         response.setStatusCode(HttpStatus.OK.value());
@@ -84,20 +66,10 @@ public class UserServiceImpl implements UserService {
     public ResponseStructure<User> updateUser(User user) {
 
         User existingUser = userRepository.findById(user.getUserId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "User not found with ID: " + user.getUserId()));
-
-        if (user.getName() == null || user.getName().isEmpty()) {
-            throw new RuleValidationException("Name cannot be empty.");
-        }
-
-        if (user.getName().length() > 25) {
-            throw new RuleValidationException("Name must be 25 characters or less.");
-        }
-
-        if (!user.getName().matches("[a-zA-Z ]+")) {
-            throw new RuleValidationException("Name must contain only alphabets.");
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + user.getUserId()));
+        
+        if (!existingUser.getEmail().equals(user.getEmail()) && userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new RecordAlreadyExistException( "User already exists with email: " + user.getEmail());
         }
 
         existingUser.setName(user.getName());
@@ -118,9 +90,7 @@ public class UserServiceImpl implements UserService {
     public ResponseStructure<String> deleteUser(Integer userId) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "User not found with ID: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
         userRepository.delete(user);
 

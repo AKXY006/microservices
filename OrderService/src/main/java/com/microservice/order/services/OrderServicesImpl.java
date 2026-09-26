@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.microservice.order.entities.Order;
+import com.microservice.order.exception.ResourcesNotFoundException;
+import com.microservice.order.exception.RuleValidationException;
 import com.microservice.order.repositories.OrderRepositories;
 import com.microservice.order.util.ResponseStructure;
 
@@ -15,11 +17,25 @@ public class OrderServicesImpl implements OrderServices{
 	    @Autowired
 	    private OrderRepositories orderRepositories;
 
-	@Override
-	public ResponseStructure<Order> createOrder(Order order) {
+	 @Override
+	 public ResponseStructure<Order> createOrder(Order order) {
+		  if (order.getUserId() == null || order.getUserId() <= 0) {
+		        throw new RuleValidationException("User ID must be greater than 0");
+		    }
+
+		    if (order.getProductId() == null || order.getProductId() <= 0) {
+		        throw new RuleValidationException("Product ID must be greater than 0");
+		    }
+
+		    if (order.getQuantity() == null || order.getQuantity() <= 0) {
+		        throw new RuleValidationException("Quantity must be greater than 0");
+		    }
+
+		    if (order.getTotalPrice() == null || order.getTotalPrice() <= 0) {
+		        throw new RuleValidationException("Total price must be greater than 0");
+		    }
 		
 		Order savedOrder = orderRepositories.save(order);
-
         ResponseStructure<Order> response = new ResponseStructure<>();
         response.setStatusCode(201);
         response.setMessage("Order created successfully");
@@ -29,21 +45,17 @@ public class OrderServicesImpl implements OrderServices{
 
 	@Override
 	public ResponseStructure<Order> getOrder(Integer orderId) {
-		Order order = orderRepositories.findById(orderId).orElse(null);
-
-        ResponseStructure<Order> response = new ResponseStructure<>();
-
-        if (order != null) {
+		
+		 Order order = orderRepositories.findById(orderId)
+		            .orElseThrow(() -> new ResourcesNotFoundException("Order not found with ID: " + orderId));
+		 
+            ResponseStructure<Order> response = new ResponseStructure<>();
             response.setStatusCode(200);
             response.setMessage("Order found successfully");
             response.setData(order);
-        } else {
-            response.setStatusCode(404);
-            response.setMessage("Order not found");
-            response.setData(null);
-        }
-        return response;
-	}
+       
+            return response;
+	   }
 
 	@Override
 	public ResponseStructure<List<Order>> getAllOrders() {
@@ -55,15 +67,25 @@ public class OrderServicesImpl implements OrderServices{
 	        response.setData(orders);
 	        return response;
 	}
-
+  
 	@Override
 	public ResponseStructure<Order> updateOrder(Order order) {
 		 Order existingOrder =
-	                orderRepositories.findById(order.getOrderId()).orElse(null);
-
-	        ResponseStructure<Order> response = new ResponseStructure<>();
-
-	        if (existingOrder != null) {
+	                orderRepositories.findById(order.getOrderId()).orElseThrow(()-> 
+	                new ResourcesNotFoundException("Order not found with ID: " + order.getOrderId()));
+		 
+		   if (order.getUserId() == null || order.getUserId() <= 0) {
+		        throw new RuleValidationException("User ID must be greater than 0");
+		    }
+		    if (order.getProductId() == null || order.getProductId() <= 0) {
+		        throw new RuleValidationException("Product ID must be greater than 0");
+		    }
+		    if (order.getQuantity() == null || order.getQuantity() <= 0) {
+		        throw new RuleValidationException("Quantity must be greater than 0");
+		    }
+		    if (order.getTotalPrice() == null || order.getTotalPrice() <= 0) {
+		        throw new RuleValidationException("Total price must be greater than 0");
+		    }
 	            existingOrder.setUserId(order.getUserId());
 	            existingOrder.setProductId(order.getProductId());
 	            existingOrder.setQuantity(order.getQuantity());
@@ -71,35 +93,28 @@ public class OrderServicesImpl implements OrderServices{
 	            existingOrder.setStatus(order.getStatus());
 
 	            Order updatedOrder = orderRepositories.save(existingOrder);
+	            ResponseStructure<Order> response = new ResponseStructure<>();
+
 	            response.setStatusCode(200);
 	            response.setMessage("Order updated successfully");
 	            response.setData(updatedOrder);
 
-	        } else {
-	            response.setStatusCode(404);
-	            response.setMessage("Order not found");
-	            response.setData(null);
-	        }
+	      
 	        return response;
 	}
 
 	@Override
 	public ResponseStructure<String> deleteOrder(Integer orderId) {
 		
-		ResponseStructure<String> response = new ResponseStructure<>();
-        Order order = orderRepositories.findById(orderId).orElse(null);
-
-        if (order != null) {
+		
+        Order order = orderRepositories.findById(orderId).orElseThrow(() ->
+        new ResourcesNotFoundException("Order not found with ID: " + orderId));
+     
             orderRepositories.delete(order);
+            ResponseStructure<String> response = new ResponseStructure<>();
             response.setStatusCode(200);
             response.setMessage("Order deleted successfully");
             response.setData("Order with ID " + orderId + " deleted");
-
-        } else {
-            response.setStatusCode(404);
-            response.setMessage("Order not found");
-            response.setData(null);
-        }
         return response;
     }
 	}

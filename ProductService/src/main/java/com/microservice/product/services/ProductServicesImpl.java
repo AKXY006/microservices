@@ -22,22 +22,15 @@ public class ProductServicesImpl implements ProductServices {
 
     @Override
     public ResponseStructure<Product> createProduct(Product product) {
-
-        if (product.getProductName() == null || product.getProductName().isEmpty()) {
-            throw new RuleValidationException("Product name cannot be empty.");
+    	if (productRepositories.findByProductName(product.getProductName()).isPresent()) {
+    	    throw new RecordAlreadyExistException("Product already exists with name: " + product.getProductName());
+    	}
+    	if (product.getPrice() == null || product.getPrice() <= 0) {
+            throw new RuleValidationException("Product price must be greater than 0");
         }
-        if (product.getPrice() == null || product.getPrice() <= 0) {
-            throw new RuleValidationException("Price must be greater than 0.");
-        }
-        if (product.getQuantity() == null || product.getQuantity() < 0) {
-            throw new RuleValidationException("Quantity cannot be negative.");
-        }
-
-        Optional<Product> existingProduct = productRepositories.findByProductName( product.getProductName());
-
-        if (existingProduct.isPresent()) {
-            throw new RecordAlreadyExistException("Product with this name already exists.");
-        }
+    	 if (product.getQuantity() == null || product.getQuantity() < 0) {
+    	        throw new RuleValidationException("Product quantity cannot be negative");
+    	    }
 
         Product savedProduct = productRepositories.save(product);
 
@@ -52,8 +45,7 @@ public class ProductServicesImpl implements ProductServices {
     public ResponseStructure<Product> getProduct(Integer productId) {
 
         Product product = productRepositories.findById(productId)
-                .orElseThrow(() ->
-                        new ResourcesNotFoundException("Product not found with ID: " + productId));
+                .orElseThrow(() -> new ResourcesNotFoundException("Product not found with ID: " + productId));
 
         ResponseStructure<Product> response = new ResponseStructure<>();
         response.setStatusCode(HttpStatus.OK.value());
@@ -78,12 +70,12 @@ public class ProductServicesImpl implements ProductServices {
     public ResponseStructure<Product> updateProduct(Product product) {
 
         Product existingProduct = productRepositories.findById(product.getProductId())
-                        .orElseThrow(() ->
-                                new ResourcesNotFoundException("Product not found with ID: "+ product.getProductId()));
-
-        if (product.getProductName() == null || product.getProductName().isEmpty()) {
-            throw new RuleValidationException("Product name cannot be empty.");
+                        .orElseThrow(() -> new ResourcesNotFoundException("Product not found with ID: "+ product.getProductId()));
+        
+        if (!existingProduct.getProductName().equals(product.getProductName()) && productRepositories.findByProductName(product.getProductName()).isPresent()) {
+            throw new RecordAlreadyExistException("Product already exists with name: " + product.getProductName());
         }
+
         if (product.getPrice() == null || product.getPrice() <= 0) {
             throw new RuleValidationException("Price must be greater than 0.");
         }

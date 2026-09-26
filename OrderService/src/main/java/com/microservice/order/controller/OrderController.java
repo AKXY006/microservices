@@ -32,8 +32,7 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<ResponseStructure<Order>> getOrder(
-            @PathVariable Integer orderId) {
+    public ResponseEntity<ResponseStructure<Order>> getOrder(@PathVariable Integer orderId) {
 
         ResponseStructure<Order> response = orderServices.getOrder(orderId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
@@ -46,10 +45,11 @@ public class OrderController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping
-    public ResponseEntity<ResponseStructure<Order>> updateOrder(@RequestBody Order order) {
+    @PutMapping("/{orderId}")
+    public ResponseEntity<ResponseStructure<Order>> updateOrder(@PathVariable Integer orderId,@RequestBody Order order) {
 
-        ResponseStructure<Order> response=orderServices.updateOrder(order);
+        order.setOrderId(orderId);
+       ResponseStructure<Order> response = orderServices.updateOrder(order);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

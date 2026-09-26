@@ -26,35 +26,31 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<ResponseStructure<Product>> createProduct(@RequestBody Product product) {
-
         ResponseStructure<Product> response = productServices.createProduct(product);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @GetMapping("/{productId}")
     public ResponseEntity<ResponseStructure<Product>> getProduct(@PathVariable Integer productId) {
-
         ResponseStructure<Product> response = productServices.getProduct(productId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @GetMapping
     public ResponseEntity<ResponseStructure<List<Product>>> getAllProducts() {
-
         ResponseStructure<List<Product>> response = productServices.getAllProducts();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping
-    public ResponseEntity<ResponseStructure<Product>> updateProduct(@RequestBody Product product) {
+    @PutMapping("/{productId}")
+    public ResponseEntity<ResponseStructure<Product>> updateProduct(@PathVariable Integer productId,@RequestBody Product product) {
 
+        product.setProductId(productId);
         ResponseStructure<Product> response = productServices.updateProduct(product);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
-
     @DeleteMapping("/{productId}")
     public ResponseEntity<ResponseStructure<String>> deleteProduct(@PathVariable Integer productId) {
-
         ResponseStructure<String> response = productServices.deleteProduct(productId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }

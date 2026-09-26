@@ -1,6 +1,7 @@
 package com.microservice.order.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -12,39 +13,39 @@ import com.microservice.order.util.ResponseStructure;
 public class MyException {
 	
 	@ExceptionHandler(ResourcesNotFoundException.class)
-    public ResponseStructure<String> resourceNotFoundException(ResourcesNotFoundException exception) {
+    public ResponseEntity<ResponseStructure<String>> resourceNotFoundException(ResourcesNotFoundException exception) {
         ResponseStructure<String> response = new ResponseStructure<>();
         response.setStatusCode(HttpStatus.NOT_FOUND.value());
         response.setMessage("Resource Not Found");
         response.setData(exception.getMessage());
-        return response;
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     @ExceptionHandler(RecordAlreadyExistException.class)
-    public ResponseStructure<String> recordAlreadyExistException(RecordAlreadyExistException exception) {
+    public ResponseEntity<ResponseStructure<String>> recordAlreadyExistException(RecordAlreadyExistException exception) {
         ResponseStructure<String> response = new ResponseStructure<>();
         response.setStatusCode(HttpStatus.CONFLICT.value());
         response.setMessage("Record Already Exists");
         response.setData(exception.getMessage());
-        return response;
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
     @ExceptionHandler(RuleValidationException.class)
-    public ResponseStructure<String> ruleValidationException(RuleValidationException exception) {
+    public ResponseEntity<ResponseStructure<String>> ruleValidationException(RuleValidationException exception) {
         ResponseStructure<String> response = new ResponseStructure<>();
         response.setStatusCode(HttpStatus.BAD_REQUEST.value());
         response.setMessage("Rule Validation Failed");
         response.setData(exception.getMessage());
-        return response;
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseStructure<String> globalException(Exception exception) {
+    public ResponseEntity<ResponseStructure<String>> globalException(Exception exception) {
         ResponseStructure<String> response = new ResponseStructure<>();
         response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
         response.setMessage("Something went wrong");
         response.setData(exception.getMessage());
-        return response;
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
 }
