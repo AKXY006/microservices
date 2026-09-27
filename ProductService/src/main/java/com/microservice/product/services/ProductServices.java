@@ -1,19 +1,20 @@
 package com.microservice.product.services;
 
-import java.util.List;
+
+import org.springframework.http.ResponseEntity;
 
 import com.microservice.product.entities.Product;
 import com.microservice.product.util.ResponseStructure;
 
 public interface ProductServices {
 
-    ResponseStructure<Product> createProduct(Product product);
+    ResponseEntity<ResponseStructure<Product>> createProduct(Product product);
 
-    ResponseStructure<Product> getProduct(Integer productId);
+    ResponseEntity<ResponseStructure<Product>> getProductById(Integer productId);
+    
+    ResponseEntity<ResponseStructure<Product>> getProductByName(String productName);
 
-    ResponseStructure<List<Product>> getAllProducts();
+    ResponseEntity<ResponseStructure<Product>> updateProductById(Product product);
 
-    ResponseStructure<Product> updateProduct(Product product);
-
-    ResponseStructure<String> deleteProduct(Integer productId);
+    ResponseEntity<ResponseStructure<Product>> deleteProductById(Integer productId);
 }

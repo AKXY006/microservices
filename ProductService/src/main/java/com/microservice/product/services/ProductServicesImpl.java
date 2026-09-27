@@ -1,10 +1,10 @@
 package com.microservice.product.services;
 
-import java.util.List;
-import java.util.Optional;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.microservice.product.entities.Product;
@@ -21,53 +21,54 @@ public class ProductServicesImpl implements ProductServices {
     private ProductRepositories productRepositories;
 
     @Override
-    public ResponseStructure<Product> createProduct(Product product) {
+    public ResponseEntity<ResponseStructure<Product>> createProduct(Product product) {
     	if (productRepositories.findByProductName(product.getProductName()).isPresent()) {
     	    throw new RecordAlreadyExistException("Product already exists with name: " + product.getProductName());
     	}
     	if (product.getPrice() == null || product.getPrice() <= 0) {
-            throw new RuleValidationException("Product price must be greater than 0");
-        }
-    	 if (product.getQuantity() == null || product.getQuantity() < 0) {
-    	        throw new RuleValidationException("Product quantity cannot be negative");
-    	    }
+    	    throw new RuleValidationException("Product price must be greater than 0");
+    	}
 
+    	if (product.getQuantity() == null || product.getQuantity() <= 0) {
+    	    throw new RuleValidationException("Product quantity must be greater than 0");
+    	}
         Product savedProduct = productRepositories.save(product);
-
-        ResponseStructure<Product> response = new ResponseStructure<>();
-        response.setStatusCode(HttpStatus.CREATED.value());
-        response.setMessage("Product created successfully");
-        response.setData(savedProduct);
-        return response;
+        ResponseStructure<Product> responseStructure = new ResponseStructure<>();
+        responseStructure.setStatusCode(HttpStatus.CREATED.value());
+        responseStructure.setMessage("Product created successfully");
+        responseStructure.setData(savedProduct);
+        return new ResponseEntity<>(responseStructure,HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseStructure<Product> getProduct(Integer productId) {
+    public ResponseEntity<ResponseStructure<Product>> getProductById(Integer productId) {
 
         Product product = productRepositories.findById(productId)
                 .orElseThrow(() -> new ResourcesNotFoundException("Product not found with ID: " + productId));
 
-        ResponseStructure<Product> response = new ResponseStructure<>();
-        response.setStatusCode(HttpStatus.OK.value());
-        response.setMessage("Product found successfully");
-        response.setData(product);
-        return response;
+        ResponseStructure<Product> responseStructure = new ResponseStructure<>();
+        responseStructure.setStatusCode(HttpStatus.OK.value());
+        responseStructure.setMessage("Product found successfully");
+        responseStructure.setData(product);
+        return new ResponseEntity<>(responseStructure,HttpStatus.OK);
+    }
+    
+    @Override
+    public ResponseEntity<ResponseStructure<Product>> getProductByName(String productName) {
+
+        Product product = productRepositories.findByProductName(productName)
+                .orElseThrow(() -> new ResourcesNotFoundException("Product not found with Name: " + productName));
+
+        ResponseStructure<Product> responseStructure = new ResponseStructure<>();
+        responseStructure.setStatusCode(HttpStatus.OK.value());
+        responseStructure.setMessage("Product found successfully");
+        responseStructure.setData(product);
+        return new ResponseEntity<>(responseStructure,HttpStatus.OK);
     }
 
+  
     @Override
-    public ResponseStructure<List<Product>> getAllProducts() {
-
-        List<Product> products = productRepositories.findAll();
-
-        ResponseStructure<List<Product>> response = new ResponseStructure<>();
-        response.setStatusCode(HttpStatus.OK.value());
-        response.setMessage("Products fetched successfully");
-        response.setData(products);
-        return response;
-    }
-
-    @Override
-    public ResponseStructure<Product> updateProduct(Product product) {
+    public ResponseEntity<ResponseStructure<Product>> updateProductById(Product product) {
 
         Product existingProduct = productRepositories.findById(product.getProductId())
                         .orElseThrow(() -> new ResourcesNotFoundException("Product not found with ID: "+ product.getProductId()));
@@ -79,8 +80,8 @@ public class ProductServicesImpl implements ProductServices {
         if (product.getPrice() == null || product.getPrice() <= 0) {
             throw new RuleValidationException("Price must be greater than 0.");
         }
-        if (product.getQuantity() == null || product.getQuantity() < 0) {
-            throw new RuleValidationException("Quantity cannot be negative.");
+        if (product.getQuantity() == null || product.getQuantity() <= 0) {
+            throw new RuleValidationException("Quantity must be greater than zero");
         }
 
         existingProduct.setProductName(product.getProductName());
@@ -89,16 +90,16 @@ public class ProductServicesImpl implements ProductServices {
         existingProduct.setQuantity(product.getQuantity());
 
         Product updatedProduct = productRepositories.save(existingProduct);
-        ResponseStructure<Product> response = new ResponseStructure<>();
+        ResponseStructure<Product> responseStructure = new ResponseStructure<>();
 
-        response.setStatusCode(HttpStatus.OK.value());
-        response.setMessage("Product updated successfully");
-        response.setData(updatedProduct);
-        return response;
-    }
+        responseStructure.setStatusCode(HttpStatus.OK.value());
+        responseStructure.setMessage("Product updated successfully");
+        responseStructure.setData(updatedProduct);
+        return new ResponseEntity<>(responseStructure,HttpStatus.OK);
+        }
 
     @Override
-    public ResponseStructure<String> deleteProduct(Integer productId) {
+    public ResponseEntity<ResponseStructure<Product>> deleteProductById(Integer productId) {
 
         Product product = productRepositories.findById(productId)
                 .orElseThrow(() ->
@@ -106,10 +107,10 @@ public class ProductServicesImpl implements ProductServices {
 
         productRepositories.delete(product);
 
-        ResponseStructure<String> response = new ResponseStructure<>();
-        response.setStatusCode(HttpStatus.OK.value());
-        response.setMessage("Product deleted successfully");
-        response.setData("Product with ID " + productId +" deleted successfully");
-        return response;
+        ResponseStructure<Product> responseStructure = new ResponseStructure<>();
+        responseStructure.setStatusCode(HttpStatus.OK.value());
+        responseStructure.setMessage("Product deleted successfully");
+        responseStructure.setData(product);
+        return new ResponseEntity<>(responseStructure,HttpStatus.OK);
     }
 }
