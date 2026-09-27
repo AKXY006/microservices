@@ -17,6 +17,8 @@ import com.microservice.order.entities.Order;
 import com.microservice.order.services.OrderServices;
 import com.microservice.order.util.ResponseStructure;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
@@ -25,38 +27,28 @@ public class OrderController {
     private OrderServices orderServices;
 
     @PostMapping
-    public ResponseEntity<ResponseStructure<Order>> createOrder(@RequestBody Order order) {
-
-        ResponseStructure<Order> response = orderServices.createOrder(order);
-        return ResponseEntity.status(response.getStatusCode()).body(response);
+    public ResponseEntity<ResponseStructure<Order>> createOrder(@Valid @RequestBody Order order) {
+        return orderServices.createOrder(order);
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<ResponseStructure<Order>> getOrder(@PathVariable Integer orderId) {
-
-        ResponseStructure<Order> response = orderServices.getOrder(orderId);
-        return ResponseEntity.status(response.getStatusCode()).body(response);
+    public ResponseEntity<ResponseStructure<Order>> getOrderById(@PathVariable Integer orderId) {
+        return orderServices.getOrderById(orderId);
     }
 
     @GetMapping
     public ResponseEntity<ResponseStructure<List<Order>>> getAllOrders() {
-
-        ResponseStructure<List<Order>> response = orderServices.getAllOrders();
-        return ResponseEntity.status(response.getStatusCode()).body(response);
+    return orderServices.getAllOrders();
     }
 
     @PutMapping("/{orderId}")
-    public ResponseEntity<ResponseStructure<Order>> updateOrder(@PathVariable Integer orderId,@RequestBody Order order) {
-
+    public ResponseEntity<ResponseStructure<Order>> updateOrderStatusById(@PathVariable Integer orderId, @Valid @RequestBody Order order) {
         order.setOrderId(orderId);
-       ResponseStructure<Order> response = orderServices.updateOrder(order);
-        return ResponseEntity.status(response.getStatusCode()).body(response);
+        return orderServices.updateOrderStatusById(orderId, order);
     }
 
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<ResponseStructure<String>> deleteOrder(@PathVariable Integer orderId) {
-
-        ResponseStructure<String> response =orderServices.deleteOrder(orderId);
-        return ResponseEntity.status(response.getStatusCode()).body(response);
+    public ResponseEntity<ResponseStructure<Order>> deleteOrderById(@PathVariable Integer orderId) {
+        return orderServices.deleteOrderById(orderId);
     }
 }

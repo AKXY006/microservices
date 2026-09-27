@@ -2,19 +2,21 @@ package com.microservice.order.services;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+
 import com.microservice.order.entities.Order;
 import com.microservice.order.util.ResponseStructure;
 
 public interface OrderServices {
 	
-	ResponseStructure<Order> createOrder(Order order);
+	ResponseEntity<ResponseStructure<Order>> createOrder(Order order);
 
-    ResponseStructure<Order> getOrder(Integer orderId);
+	ResponseEntity<ResponseStructure<Order>> getOrderById(Integer orderId);
 
-    ResponseStructure<List<Order>> getAllOrders();
+	ResponseEntity<ResponseStructure<List<Order>>> getAllOrders();
 
-    ResponseStructure<Order> updateOrder(Order order);
+    ResponseEntity<ResponseStructure<Order>> updateOrderStatusById(Integer orderId, Order order);
 
-    ResponseStructure<String> deleteOrder(Integer orderId);
+    ResponseEntity<ResponseStructure<Order>> deleteOrderById(Integer orderId);
 
 }
