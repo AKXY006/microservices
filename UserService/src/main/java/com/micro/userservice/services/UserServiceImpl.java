@@ -2,6 +2,9 @@ package com.micro.userservice.services;
 
 import java.util.List;
 
+import com.micro.userservice.client.OrderClient;
+import com.micro.userservice.dto.OrderDto;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private OrderClient orderClient;
 
     @Override
     public ResponseEntity<ResponseStructure<User>> createUser(User user) {
@@ -88,6 +94,12 @@ public class UserServiceImpl implements UserService {
         responseStructure.setMessage("Users fetched successfully");
         responseStructure.setData(users);
         return new ResponseEntity<>(responseStructure,HttpStatus.OK); 
+    }
+    
+    @Override
+    public ResponseEntity<?> getOrdersByUserId(Integer userId) {
+        ResponseStructure<List<OrderDto>> orderResponse = orderClient.getOrderByUserId(userId);
+        return new ResponseEntity<>(orderResponse, HttpStatus.OK);
     }
 
 

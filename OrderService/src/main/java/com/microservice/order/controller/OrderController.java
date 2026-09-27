@@ -51,4 +51,9 @@ public class OrderController {
     public ResponseEntity<ResponseStructure<Order>> deleteOrderById(@PathVariable Integer orderId) {
         return orderServices.deleteOrderById(orderId);
     }
+    
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<ResponseStructure<List<Order>>> getOrdersByUserId(@PathVariable Integer userId) {
+        return orderServices.getOrdersByUserId(userId);
+    }
 }

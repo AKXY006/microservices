@@ -18,5 +18,8 @@ public interface OrderServices {
     ResponseEntity<ResponseStructure<Order>> updateOrderStatusById(Integer orderId, Order order);
 
     ResponseEntity<ResponseStructure<Order>> deleteOrderById(Integer orderId);
+    
+    ResponseEntity<ResponseStructure<List<Order>>> getOrdersByUserId(Integer userId);
+    
 
 }

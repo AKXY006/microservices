@@ -48,4 +48,9 @@ public class UserController {
     public ResponseEntity<ResponseStructure<List<User>>> getAllUsers() {
         return userService.getAllUsers();
     }
+    
+    @GetMapping("/{userId}/orders")
+    public ResponseEntity<?> getOrdersByUserId(@PathVariable Integer userId) {
+        return userService.getOrdersByUserId(userId);
+    }
 }

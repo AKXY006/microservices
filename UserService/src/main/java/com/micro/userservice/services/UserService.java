@@ -21,4 +21,6 @@ public interface UserService {
 
     ResponseEntity<ResponseStructure<User>> updateUser(User user);
     
+    ResponseEntity<?> getOrdersByUserId(Integer userId);
+    
 }

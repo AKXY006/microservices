@@ -101,6 +101,19 @@ public class OrderServicesImpl implements OrderServices{
             responseStructure.setData(order);
             return new ResponseEntity<>(responseStructure,HttpStatus.OK);
             }
+	        
+	        @Override
+	        public ResponseEntity<ResponseStructure<List<Order>>> getOrdersByUserId(Integer userId) {
+
+	            List<Order> orders = orderRepositories.findByUserId(userId);
+
+	            ResponseStructure<List<Order>> responseStructure = new ResponseStructure<>();
+	            responseStructure.setStatusCode(HttpStatus.OK.value());
+	            responseStructure.setMessage("Orders fetched successfully");
+	            responseStructure.setData(orders);
+
+	            return new ResponseEntity<>(responseStructure, HttpStatus.OK);
+	        }
 	        }
 
   
