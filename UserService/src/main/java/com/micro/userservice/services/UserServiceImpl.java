@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.micro.userservice.entities.User;
@@ -19,86 +20,75 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Override
-    public ResponseStructure<User> createUser(User user) {
+    public ResponseEntity<ResponseStructure<User>> createUser(User user) {
     	if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-    	    throw new RecordAlreadyExistException("User already exists with email: " + user.getEmail()
-    	    );
+    	    throw new RecordAlreadyExistException("User already exists with email: " + user.getEmail());
     	}
         User savedUser = userRepository.save(user);
-
-
         ResponseStructure<User> responseStructure = new ResponseStructure<>();
         responseStructure.setStatusCode(HttpStatus.CREATED.value());
         responseStructure.setMessage("User created successfully");
         responseStructure.setData(savedUser);
-
-        return responseStructure;
+        return new ResponseEntity<>(responseStructure,HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseStructure<User> getUser(Integer userId) {
-
+    public ResponseEntity<ResponseStructure<User>> getUserById(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
-        ResponseStructure<User> response = new ResponseStructure<>();
-        response.setStatusCode(HttpStatus.OK.value());
-        response.setMessage("User found successfully");
-        response.setData(user);
-
-        return response;
+        ResponseStructure<User> responseStructure = new ResponseStructure<>();
+        responseStructure.setStatusCode(HttpStatus.OK.value());
+        responseStructure.setMessage("User found successfully");
+        responseStructure.setData(user);
+        return new ResponseEntity<>(responseStructure,HttpStatus.OK);
+       
     }
+    
 
+	@Override
+	public ResponseEntity<ResponseStructure<List<User>>> getUserByName(String name) {
+		List<User> users = userRepository.findByName(name); 
+		if (users.isEmpty()) {
+	        throw new ResourceNotFoundException("User not found with Name: " + name);
+	    }
+	        ResponseStructure<List<User>> responseStructure = new ResponseStructure<>();
+	        responseStructure.setStatusCode(HttpStatus.OK.value());
+	        responseStructure.setMessage("User found successfully");
+	        responseStructure.setData(users);
+	        return new ResponseEntity<>(responseStructure,HttpStatus.OK);
+	}
+    
+  
     @Override
-    public ResponseStructure<List<User>> getAllUsers() {
-
-        List<User> users = userRepository.findAll();
-
-        ResponseStructure<List<User>> response = new ResponseStructure<>();
-        response.setStatusCode(HttpStatus.OK.value());
-        response.setMessage("Users fetched successfully");
-        response.setData(users);
-
-        return response;
-    }
-
-    @Override
-    public ResponseStructure<User> updateUser(User user) {
-
+    public ResponseEntity<ResponseStructure<User>> updateUser(User user) {
         User existingUser = userRepository.findById(user.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + user.getUserId()));
         
         if (!existingUser.getEmail().equals(user.getEmail()) && userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new RecordAlreadyExistException( "User already exists with email: " + user.getEmail());
         }
-
         existingUser.setName(user.getName());
         existingUser.setEmail(user.getEmail());
         existingUser.setAbout(user.getAbout());
 
         User updatedUser = userRepository.save(existingUser);
-
-        ResponseStructure<User> response = new ResponseStructure<>();
-        response.setStatusCode(HttpStatus.OK.value());
-        response.setMessage("User updated successfully");
-        response.setData(updatedUser);
-
-        return response;
+        ResponseStructure<User> responseStructure = new ResponseStructure<>();
+        responseStructure.setStatusCode(HttpStatus.OK.value());
+        responseStructure.setMessage("User updated successfully");
+        responseStructure.setData(updatedUser);
+        return new ResponseEntity<>(responseStructure,HttpStatus.OK);   
     }
-
+    
     @Override
-    public ResponseStructure<String> deleteUser(Integer userId) {
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
-
-        userRepository.delete(user);
-
-        ResponseStructure<String> response = new ResponseStructure<>();
-        response.setStatusCode(HttpStatus.OK.value());
-        response.setMessage("User deleted successfully");
-        response.setData("User with ID " + userId + " deleted successfully");
-
-        return response;
+    public  ResponseEntity<ResponseStructure<List<User>>> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        ResponseStructure<List<User>> responseStructure = new ResponseStructure<>();
+        responseStructure.setStatusCode(HttpStatus.OK.value());
+        responseStructure.setMessage("Users fetched successfully");
+        responseStructure.setData(users);
+        return new ResponseEntity<>(responseStructure,HttpStatus.OK); 
     }
+
+
 }

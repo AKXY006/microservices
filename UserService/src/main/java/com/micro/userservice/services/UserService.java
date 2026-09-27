@@ -2,6 +2,8 @@ package com.micro.userservice.services;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+
 import com.micro.userservice.entities.User;
 import com.micro.userservice.util.ResponseStructure;
 
@@ -9,13 +11,14 @@ import com.micro.userservice.util.ResponseStructure;
 public interface UserService {
 
 
-    ResponseStructure<User> createUser(User user);
+    ResponseEntity<ResponseStructure<User>> createUser(User user);
 
-    ResponseStructure<User> getUser(Integer userId);
+    ResponseEntity<ResponseStructure<User>> getUserById(Integer userId);
+    
+    ResponseEntity<ResponseStructure<List<User>>> getUserByName(String name);
 
-    ResponseStructure<List<User>> getAllUsers();
+    ResponseEntity<ResponseStructure<List<User>>> getAllUsers();
 
-    ResponseStructure<User> updateUser(User user);
-
-    ResponseStructure<String> deleteUser(Integer userId);
+    ResponseEntity<ResponseStructure<User>> updateUser(User user);
+    
 }
