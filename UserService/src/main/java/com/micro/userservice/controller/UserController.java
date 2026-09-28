@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,8 +45,15 @@ public class UserController {
         return userService.updateUser(user);
     }
 
+//    @GetMapping
+//    public ResponseEntity<ResponseStructure<List<User>>> getAllUsers() {
+//        return userService.getAllUsers();
+//    }
+    
     @GetMapping
-    public ResponseEntity<ResponseStructure<List<User>>> getAllUsers() {
+    public ResponseEntity<ResponseStructure<List<User>>> getAllUsers(@RequestHeader("X-Gateway") String gateway) {
+        System.out.println("Request received in UserController");
+        System.out.println("X-Gateway Header: " + gateway);
         return userService.getAllUsers();
     }
     
