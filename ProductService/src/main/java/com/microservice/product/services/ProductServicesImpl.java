@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.microservice.product.client.OrderClient;
 import com.microservice.product.entities.Product;
 import com.microservice.product.exception.RecordAlreadyExistException;
 import com.microservice.product.exception.ResourcesNotFoundException;
@@ -19,6 +20,9 @@ public class ProductServicesImpl implements ProductServices {
 
     @Autowired
     private ProductRepositories productRepositories;
+    
+    @Autowired
+   private OrderClient orderClient;
 
     @Override
     public ResponseEntity<ResponseStructure<Product>> createProduct(Product product) {
@@ -100,13 +104,19 @@ public class ProductServicesImpl implements ProductServices {
 
     @Override
     public ResponseEntity<ResponseStructure<Product>> deleteProductById(Integer productId) {
-
         Product product = productRepositories.findById(productId)
                 .orElseThrow(() ->
                         new ResourcesNotFoundException("Product not found with ID: " + productId));
+        
+        boolean active = orderClient.hasActiveOrderByProductId(productId);
 
+        if (active) {
+            throw new RuleValidationException(
+                    "Product cannot be deleted because it has an active order"
+            );
+        }
+        
         productRepositories.delete(product);
-
         ResponseStructure<Product> responseStructure = new ResponseStructure<>();
         responseStructure.setStatusCode(HttpStatus.OK.value());
         responseStructure.setMessage("Product deleted successfully");

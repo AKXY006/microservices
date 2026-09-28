@@ -7,7 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.microservice.order.client.ProductClient;
+import com.microservice.order.dto.ProductDto;
 import com.microservice.order.entities.Order;
+import com.microservice.order.entities.Status;
 import com.microservice.order.exception.ResourcesNotFoundException;
 import com.microservice.order.exception.RuleValidationException;
 import com.microservice.order.repositories.OrderRepositories;
@@ -18,6 +21,9 @@ public class OrderServicesImpl implements OrderServices{
 	
 	    @Autowired
 	    private OrderRepositories orderRepositories;
+	    
+	    @Autowired
+	    private ProductClient productClient;
 
 	        @Override
 	        public ResponseEntity<ResponseStructure<Order>> createOrder(Order order) {
@@ -31,9 +37,17 @@ public class OrderServicesImpl implements OrderServices{
 		    if(order.getQuantity() == null || order.getQuantity() <= 0) {
 		        throw new RuleValidationException("Quantity must be greater than 0");
 		    }
-		    if(order.getTotalPrice() == null || order.getTotalPrice() <= 0) {
-		        throw new RuleValidationException("Total price must be greater than 0");
+		    
+		    ResponseStructure<ProductDto> productResponse = productClient.getProductById(order.getProductId());
+		    ProductDto product = productResponse.getData();
+
+		    if (product.getQuantity() < order.getQuantity()) {
+		        throw new RuleValidationException("Insufficient product quantity");
 		    }
+		    
+		    double totalPrice = product.getPrice() * order.getQuantity();
+		    order.setTotalPrice(totalPrice);
+		    order.setStatus(Status.PLACED);
 		
 		    Order savedOrder = orderRepositories.save(order);
 		
@@ -114,6 +128,20 @@ public class OrderServicesImpl implements OrderServices{
 
 	            return new ResponseEntity<>(responseStructure, HttpStatus.OK);
 	        }
+	        
+	        @Override
+	        public boolean hasActiveOrder(Integer userId) {
+            List<Status> activeStatuses = List.of(Status.PLACED,Status.CONFIRMED,Status.SHIPPED);
+            return orderRepositories.existsByUserIdAndStatusIn(userId,activeStatuses);
+	        }
+	        
+	        
+	        @Override
+	        public boolean hasActiveOrderByProductId(Integer productId) {
+	            List<Status> activeStatuses = List.of(Status.PLACED,Status.CONFIRMED,Status.SHIPPED);
+	            return orderRepositories.existsByProductIdAndStatusIn(productId,activeStatuses);
+	        }
+	        
 	        }
 
   

@@ -41,12 +41,10 @@ public class Order {
     private Integer quantity;
 
     @Column(name = "total_price", nullable = false)
-    @NotNull
     @Positive
     private Double totalPrice;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    @NotNull
     private Status status;
 }

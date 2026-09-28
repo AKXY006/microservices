@@ -3,6 +3,7 @@ package com.microservice.order.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,5 +56,17 @@ public class OrderController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<ResponseStructure<List<Order>>> getOrdersByUserId(@PathVariable Integer userId) {
         return orderServices.getOrdersByUserId(userId);
+    }
+    
+    @GetMapping("/user/{userId}/active")
+    public ResponseEntity<Boolean> hasActiveOrder(@PathVariable Integer userId) {
+        boolean active = orderServices.hasActiveOrder(userId);
+        return new ResponseEntity<>(active, HttpStatus.OK);
+    }
+    
+    @GetMapping("/product/{productId}/active")
+    public ResponseEntity<Boolean> hasActiveOrderByProductId(@PathVariable Integer productId) {
+        boolean active = orderServices.hasActiveOrderByProductId(productId);
+        return new ResponseEntity<>(active, HttpStatus.OK);
     }
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 
+import com.microservice.order.dto.ProductDto;
 import com.microservice.order.entities.Order;
 import com.microservice.order.util.ResponseStructure;
 
@@ -20,6 +21,11 @@ public interface OrderServices {
     ResponseEntity<ResponseStructure<Order>> deleteOrderById(Integer orderId);
     
     ResponseEntity<ResponseStructure<List<Order>>> getOrdersByUserId(Integer userId);
+    
+    boolean hasActiveOrder(Integer userId);
+    
+    boolean hasActiveOrderByProductId(Integer productId);
+
     
 
 }

@@ -23,4 +23,6 @@ public interface UserService {
     
     ResponseEntity<?> getOrdersByUserId(Integer userId);
     
+    ResponseEntity<ResponseStructure<User>> deleteUserById(Integer userId);
+    
 }

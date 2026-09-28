@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.micro.userservice.entities.User;
 import com.micro.userservice.exception.RecordAlreadyExistException;
 import com.micro.userservice.exception.ResourceNotFoundException;
+import com.micro.userservice.exception.RuleValidationException;
 import com.micro.userservice.repositories.UserRepository;
 import com.micro.userservice.util.ResponseStructure;
 
@@ -100,6 +101,26 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<?> getOrdersByUserId(Integer userId) {
         ResponseStructure<List<OrderDto>> orderResponse = orderClient.getOrderByUserId(userId);
         return new ResponseEntity<>(orderResponse, HttpStatus.OK);
+    }
+    
+    @Override
+    public ResponseEntity<ResponseStructure<User>> deleteUserById(Integer userId) {
+        ResponseStructure<User> responseStructure = new ResponseStructure<>();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
+        ResponseEntity<Boolean> response = orderClient.hasActiveOrder(userId);
+
+        if (response.getBody()) {
+            throw new RuleValidationException("User cannot be deleted because user has an active order");
+        }
+        userRepository.delete(user);
+        responseStructure.setStatusCode(HttpStatus.OK.value());
+        responseStructure.setMessage("User deleted successfully");
+        responseStructure.setData(user);
+
+        return new ResponseEntity<>(responseStructure, HttpStatus.OK);
     }
 
 
