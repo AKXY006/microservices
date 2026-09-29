@@ -1,33 +1,6 @@
-server:
-  port: 8083
-
 spring:
   application:
     name: ORDER-SERVICE
 
-  datasource:
-    url: jdbc:mysql://localhost:3306/microservices
-    username: root
-    password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-
-resilience4j:
-  circuitbreaker:
-    instances:
-      productService:
-        sliding-window-type: COUNT_BASED
-        sliding-window-size: 5
-        minimum-number-of-calls: 3
-        failure-rate-threshold: 50
-        wait-duration-in-open-state: 10s
-        permitted-number-of-calls-in-half-open-state: 2
+  config:
+    import: configserver:http://localhost:8888
