@@ -3,6 +3,8 @@ package com.microservice.order.services;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,8 @@ import com.microservice.order.exception.RuleValidationException;
 import com.microservice.order.repositories.OrderRepositories;
 import com.microservice.order.util.ResponseStructure;
 
+
+
 @Service
 public class OrderServicesImpl implements OrderServices{
 	
@@ -24,6 +28,9 @@ public class OrderServicesImpl implements OrderServices{
 	    
 	    @Autowired
 	    private ProductClient productClient;
+	    
+	    @Autowired
+	    private CircuitBreakerFactory circuitBreakerFactory;
 
 	        @Override
 	        public ResponseEntity<ResponseStructure<Order>> createOrder(Order order) {
@@ -38,7 +45,27 @@ public class OrderServicesImpl implements OrderServices{
 		        throw new RuleValidationException("Quantity must be greater than 0");
 		    }
 		    
-		    ResponseStructure<ProductDto> productResponse = productClient.getProductById(order.getProductId());
+//		    ResponseStructure<ProductDto> productResponse = productClient.getProductById(order.getProductId());
+		    
+		    //REPLACE
+		    CircuitBreaker circuitBreaker = circuitBreakerFactory.create("productService");
+//
+//		    ResponseStructure<ProductDto> productResponse = circuitBreaker.run(
+//		                () -> productClient.getProductById(order.getProductId()),
+//		                throwable -> {
+//		                    throw new RuntimeException("Product Service is currently unavailable");
+//		                }
+//		            );
+		    
+		    ResponseStructure<ProductDto> productResponse = circuitBreaker.run(
+		                 () -> productClient.getProductById(order.getProductId()),
+		            throwable -> {
+		                System.out.println("Circuit Breaker Error: " + throwable.getMessage());
+		                throwable.printStackTrace();
+		                throw new RuntimeException("Product Service is currently unavailable: " + throwable.getMessage());
+		            }
+		    );
+
 		    ProductDto product = productResponse.getData();
 
 		    if (product.getQuantity() < order.getQuantity()) {
