@@ -19,5 +19,7 @@ public interface OrderClient {
 	@GetMapping("/orders/user/{userId}/active")
 	ResponseEntity<Boolean> hasActiveOrder(@PathVariable Integer userId);
 	
+	 @GetMapping("/orders/loadbalancer/instance")
+	 String getOrderServiceInstance();
 
 }

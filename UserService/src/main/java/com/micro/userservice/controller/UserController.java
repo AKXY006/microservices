@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.micro.userservice.client.OrderClient;
 import com.micro.userservice.entities.User;
 import com.micro.userservice.services.UserService;
 import com.micro.userservice.util.ResponseStructure;
@@ -24,6 +25,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private OrderClient orderClient;
 
     @PostMapping
     public ResponseEntity<ResponseStructure<User>> createUser(@RequestBody User user) {
@@ -66,5 +70,10 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public ResponseEntity<ResponseStructure<User>> deleteUserById(@PathVariable Integer userId) {
         return userService.deleteUserById(userId);
+    }
+    
+    @GetMapping("/test-loadbalancer")
+    public String testLoadBalancer() {
+        return orderClient.getOrderServiceInstance();
     }
 }

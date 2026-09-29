@@ -3,6 +3,8 @@ package com.microservice.order.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.server.context.WebServerApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,6 +28,12 @@ public class OrderController {
 
     @Autowired
     private OrderServices orderServices;
+    
+    @Value("${server.port}")
+    private String port;
+    
+    @Autowired
+    private WebServerApplicationContext webServerApplicationContext;
 
     @PostMapping
     public ResponseEntity<ResponseStructure<Order>> createOrder(@Valid @RequestBody Order order) {
@@ -68,5 +76,16 @@ public class OrderController {
     public ResponseEntity<Boolean> hasActiveOrderByProductId(@PathVariable Integer productId) {
         boolean active = orderServices.hasActiveOrderByProductId(productId);
         return new ResponseEntity<>(active, HttpStatus.OK);
+    }
+    
+//    @GetMapping("/loadbalancer/instance")
+//    public String getInstance() {
+//        return "OrderService running on port: " + System.getProperty("local.server.port");
+//    }
+    
+    @GetMapping("/loadbalancer/instance")
+    public String getInstance() {
+        int port = webServerApplicationContext.getWebServer().getPort();
+        return "OrderService running on port: " + port;
     }
 }
